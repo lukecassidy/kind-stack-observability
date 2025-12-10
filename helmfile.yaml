@@ -7,6 +7,7 @@ helmDefaults:
 repositories:
   - name: prometheus-community
     url: https://prometheus-community.github.io/helm-charts
+
 releases:
   # Prometheus
   - name: prometheus
@@ -21,3 +22,19 @@ releases:
     chart: grafana/grafana
     values:
       - values/grafana-values.yaml
+
+  # Elasticsearch
+  - name: elasticsearch
+    namespace: observability
+    chart: elastic/elasticsearch
+    values:
+      - values/elasticsearch-values.yaml
+
+  # Kibana
+  - name: kibana
+    namespace: observability
+    chart: elastic/kibana
+    values:
+      - values/kibana-values.yaml
+    needs:
+      - observability/elasticsearch
