@@ -7,6 +7,14 @@ helmDefaults:
 repositories:
   - name: prometheus-community
     url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: elastic
+    url: https://helm.elastic.co
+  - name: fluent
+    url: https://fluent.github.io/helm-charts
+  - name: podinfo
+    url: https://stefanprodan.github.io/podinfo
 
 releases:
   # Prometheus
