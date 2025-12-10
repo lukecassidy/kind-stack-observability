@@ -14,3 +14,10 @@ releases:
     chart: prometheus-community/prometheus
     values:
       - values/prometheus-values.yaml
+
+  # Grafana
+  - name: grafana
+    namespace: observability
+    chart: grafana/grafana
+    values:
+      - values/grafana-values.yaml
