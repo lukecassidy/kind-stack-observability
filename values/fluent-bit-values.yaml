@@ -1,0 +1,28 @@
+namespace: observability
+
+serviceAccount:
+  create: true
+
+backend:
+  type: es
+  es:
+    host: elasticsearch-master.observability.svc.cluster.local
+    port: 9200
+    index: "kubernetes-logs"
+    logstash_format: true
+    replace_dots: On
+    tls: Off
+
+input:
+  tail:
+    enabled: true
+    path: /var/log/containers/*.log
+    parser: docker
+    tag: kube.*
+    memBufLimit: 5MB
+    skipLongLines: On
+
+filters:
+  kubernetes:
+    enabled: true
+    match: kube.*

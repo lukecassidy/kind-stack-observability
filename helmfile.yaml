@@ -38,3 +38,12 @@ releases:
       - values/kibana-values.yaml
     needs:
       - observability/elasticsearch
+
+  # Fluent Bit
+  - name: fluent-bit
+    namespace: observability
+    chart: fluent/fluent-bit
+    values:
+      - values/fluent-bit-values.yaml
+    needs:
+      - observability/elasticsearch
