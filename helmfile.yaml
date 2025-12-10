@@ -47,3 +47,10 @@ releases:
       - values/fluent-bit-values.yaml
     needs:
       - observability/elasticsearch
+
+  # Sample app: podinfo
+  - name: podinfo
+    namespace: demo
+    chart: podinfo/podinfo
+    values:
+      - values/podinfo-values.yaml

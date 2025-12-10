@@ -1,0 +1,25 @@
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9898"
+  prometheus.io/path: "/metrics"
+
+ui:
+  color: "#3455db"
+  message: "Hello from podinfo on kind-stack-observability"
+  logo: ""
+
+backend: "static"
