@@ -17,7 +17,8 @@ Open:
 - Prometheus → [http://localhost:9090](http://localhost:9090)
 - Grafana → [http://localhost:3000](http://localhost:3000) (admin/admin)
 - OpenSearch Dashboards → [http://localhost:5601](http://localhost:5601)
-- podinfo → [http://localhost:8080](http://localhost:8080)
+- podinfo-frontend → [http://localhost:8080](http://localhost:8080)
+- podinfo-backend → [http://localhost:8081](http://localhost:8081)
 
 ---
 
@@ -32,13 +33,14 @@ Open:
 
 ## Defaults (Ports, Auth, Namespaces)
 
-| Component             | Namespace     | URL / Port                                     | Auth          | Notes                             |
-| --------------------- | ------------- | ---------------------------------------------- | ------------- | --------------------------------- |
-| Prometheus            | observability | [http://localhost:9090](http://localhost:9090) | none          | no persistence                    |
-| Grafana               | observability | [http://localhost:3000](http://localhost:3000) | admin / admin | no persistence                    |
-| OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200) | none          | security disabled                 |
-| OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601) | none          | security disabled                 |
-| podinfo               | demo          | [http://localhost:8080](http://localhost:8080) | none          | `/readyz`, `/healthz`, `/metrics` |
+| Component             | Namespace     | URL / Port                                     | Auth          | Notes                        |
+| --------------------- | ------------- | ---------------------------------------------- | ------------- | ---------------------------- |
+| Prometheus            | observability | [http://localhost:9090](http://localhost:9090) | none          | no persistence               |
+| Grafana               | observability | [http://localhost:3000](http://localhost:3000) | admin / admin | no persistence               |
+| OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200) | none          | security disabled            |
+| OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601) | none          | security disabled            |
+| podinfo-frontend      | demo          | [http://localhost:8080](http://localhost:8080) | none          | web UI, `/api/echo` endpoint |
+| podinfo-backend       | demo          | [http://localhost:8081](http://localhost:8081) | none          | backend echo service         |
 
 Deployment is handled by Helm via Helmfile, with make commands simplifying all operations.
 
@@ -57,11 +59,15 @@ flowchart LR
         end
 
         subgraph Demo Namespace
-            PI[podinfo]
+            PIF[podinfo-frontend]
+            PIB[podinfo-backend]
         end
 
-        PI -->|metrics| P
-        PI -->|logs| FB --> OS --> OSD
+        PIF -->|/api/echo| PIB
+        PIF -->|metrics| P
+        PIB -->|metrics| P
+        PIF -->|logs| FB --> OS --> OSD
+        PIB -->|logs| FB
         G -->|dashboards| P
     end
 ```
@@ -69,11 +75,31 @@ flowchart LR
 ---
 
 ## Sample App: podinfo
-podinfo lives in the `demo` namespace and produces both logs and metrics for testing the pipeline.
+podinfo lives in the `demo` namespace and produces both logs and metrics for testing.
+- **podinfo-frontend** (port 8080) - Frontend service with web UI
+- **podinfo-backend** (port 8081) - Backend service for echo requests
 
-Endpoints: `/`, `/readyz`, `/healthz`, `/metrics` (9898)
+Endpoints:
+    - `/`
+    - `/env`
+    - `/headers`
+    - `/healthz`
+    - `/readyz`
+    - `/metrics`
 
-No manual port-forwarding needed when using `make pf-all`.
+
+Test that the frontend can successfully communicate with the backend.
+
+```bash
+curl -X POST http://localhost:8080/api/echo -d '{"test":"frontend-to-backend"}'
+```
+
+Expected response:
+```json
+[
+  "{\"test\":\"frontend-to-backend\"}"
+]
+```
 
 ---
 
@@ -127,6 +153,6 @@ make kind-down  # delete the kind cluster
 ## Notes
 - OpenSearch is single node and unsecured (dev only).
 - Fluent Bit forwards all container logs to OpenSearch.
-- podinfo is the traffic + metrics source for validating end to end observability.
+- podinfo pods are for validating end to end observability.
 - Prometheus and Grafana are non persistent to support an ephemeral workflow.
 - The stack is intended for short lived, iterative demo environments.

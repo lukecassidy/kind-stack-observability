@@ -56,9 +56,18 @@ releases:
     needs:
       - observability/opensearch
 
-  # Sample app: podinfo
-  - name: podinfo
+  # Sample app: podinfo backend
+  - name: podinfo-backend
     namespace: demo
     chart: podinfo/podinfo
     values:
-      - values/podinfo-values.yaml
+      - values/podinfo-backend-values.yaml
+
+  # Sample app: podinfo frontend
+  - name: podinfo-frontend
+    namespace: demo
+    chart: podinfo/podinfo
+    values:
+      - values/podinfo-frontend-values.yaml
+    needs:
+      - demo/podinfo-backend

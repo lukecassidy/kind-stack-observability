@@ -32,14 +32,15 @@ pf-dashboards:
 	kubectl port-forward svc/opensearch-dashboards -n observability 5601:5601
 
 pf-podinfo:
-	kubectl port-forward svc/podinfo -n demo 8080:9898
+	kubectl port-forward svc/podinfo-frontend -n demo 8080:9898
 
 pf-all:
 	kubectl port-forward svc/prometheus-server -n observability 9090:80 &
 	kubectl port-forward svc/grafana -n observability 3000:80 &
 	kubectl port-forward svc/opensearch-cluster-master -n observability 9200:9200 &
 	kubectl port-forward svc/opensearch-dashboards -n observability 5601:5601 &
-	kubectl port-forward svc/podinfo -n demo 8080:9898 &
+	kubectl port-forward svc/podinfo-frontend -n demo 8080:9898 &
+	kubectl port-forward svc/podinfo-backend -n demo 8081:9898 &
 	wait
 
 pf-stop:

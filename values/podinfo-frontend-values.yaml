@@ -1,4 +1,4 @@
-# Podinfo configuration
+# Podinfo (frontend) configuration
 replicaCount: 1
 
 service:
@@ -20,7 +20,7 @@ podAnnotations:
 
 ui:
   color: "#3455db"
-  message: "Hello from podinfo on kind-stack-observability"
+  message: "Frontend service"
   logo: ""
 
-backend: ""
+backend: "http://podinfo-backend:9898/echo"
