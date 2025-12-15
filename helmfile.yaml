@@ -9,8 +9,8 @@ repositories:
     url: https://prometheus-community.github.io/helm-charts
   - name: grafana
     url: https://grafana.github.io/helm-charts
-  - name: elastic
-    url: https://helm.elastic.co
+  - name: opensearch
+    url: https://opensearch-project.github.io/helm-charts
   - name: fluent
     url: https://fluent.github.io/helm-charts
   - name: podinfo
@@ -31,21 +31,21 @@ releases:
     values:
       - values/grafana-values.yaml
 
-  # Elasticsearch
-  - name: elasticsearch
+  # OpenSearch
+  - name: opensearch
     namespace: observability
-    chart: elastic/elasticsearch
+    chart: opensearch/opensearch
     values:
-      - values/elasticsearch-values.yaml
+      - values/opensearch-values.yaml
 
-  # Kibana
-  - name: kibana
+  # OpenSearch Dashboards
+  - name: opensearch-dashboards
     namespace: observability
-    chart: elastic/kibana
+    chart: opensearch/opensearch-dashboards
     values:
-      - values/kibana-values.yaml
+      - values/opensearch-dashboards-values.yaml
     needs:
-      - observability/elasticsearch
+      - observability/opensearch
 
   # Fluent Bit
   - name: fluent-bit
@@ -54,7 +54,7 @@ releases:
     values:
       - values/fluent-bit-values.yaml
     needs:
-      - observability/elasticsearch
+      - observability/opensearch
 
   # Sample app: podinfo
   - name: podinfo

@@ -1,28 +1,38 @@
+# Fluent Bit configuration
 namespace: observability
 
 serviceAccount:
   create: true
 
-backend:
-  type: es
-  es:
-    host: elasticsearch-master.observability.svc.cluster.local
-    port: 9200
-    index: "kubernetes-logs"
-    logstash_format: true
-    replace_dots: On
-    tls: Off
+config:
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
 
-input:
-  tail:
-    enabled: true
-    path: /var/log/containers/*.log
-    parser: docker
-    tag: kube.*
-    memBufLimit: 5MB
-    skipLongLines: On
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
 
-filters:
-  kubernetes:
-    enabled: true
-    match: kube.*
+  outputs: |
+    [OUTPUT]
+        Name es
+        Match kube.*
+        Host opensearch-cluster-master.observability.svc.cluster.local
+        Port 9200
+        Logstash_Format On
+        Logstash_Prefix kubernetes-logs
+        Replace_Dots On
+        Retry_Limit False
+        tls Off
+        # Suppress _type parameter for OpenSearch compatibility
+        Suppress_Type_Name On

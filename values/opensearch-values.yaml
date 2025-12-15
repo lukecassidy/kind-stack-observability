@@ -1,0 +1,35 @@
+# OpenSearch configuration
+clusterName: "opensearch-cluster"
+
+singleNode: true
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+# Disable security for simpler KIND setup (no SSL/TLS)
+config:
+  opensearch.yml: |
+    cluster.name: opensearch-cluster
+    network.host: 0.0.0.0
+    plugins:
+      security:
+        disabled: true
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+httpPort: 9200
+
+# No antiAffinity needed (single node)
+antiAffinity: "soft"
+
+replicas: 1
+
+service:
+  type: ClusterIP

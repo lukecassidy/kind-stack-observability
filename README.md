@@ -10,13 +10,13 @@ Built for **development and demos only**. Quick to spin up, quick to tear down.
 make kind-up  # create cluster
 make deploy   # deploy stack and sample app
 make status   # verify pods
-make pf-all   # port-forward all UIs (Prometheus, Grafana, Kibana, podinfo)
+make pf-all   # port-forward all UIs (Prometheus, Grafana, OpenSearch Dashboards, podinfo)
 ```
 
 Open:
 - Prometheus → [http://localhost:9090](http://localhost:9090)
 - Grafana → [http://localhost:3000](http://localhost:3000) (admin/admin)
-- Kibana → [http://localhost:5601](http://localhost:5601)
+- OpenSearch Dashboards → [http://localhost:5601](http://localhost:5601)
 - podinfo → [http://localhost:8080](http://localhost:8080)
 
 ---
@@ -30,14 +30,15 @@ Open:
 
 ---
 
-## Defaults (Ports, Creds, Namespaces)
+## Defaults (Ports, Auth, Namespaces)
 
-| Component  | Namespace     | URL / Port                                     | Auth          | Notes                             |
-| ---------- | ------------- | ---------------------------------------------- | ------------- | --------------------------------- |
-| Prometheus | observability | [http://localhost:9090](http://localhost:9090) | none          | no persistence                    |
-| Grafana    | observability | [http://localhost:3000](http://localhost:3000) | admin / admin | no persistence                    |
-| Kibana     | observability | [http://localhost:5601](http://localhost:5601) | none          | ES unsecured                      |
-| podinfo    | demo          | [http://localhost:8080](http://localhost:8080) | none          | `/readyz`, `/healthz`, `/metrics` |
+| Component             | Namespace     | URL / Port                                     | Auth          | Notes                             |
+| --------------------- | ------------- | ---------------------------------------------- | ------------- | --------------------------------- |
+| Prometheus            | observability | [http://localhost:9090](http://localhost:9090) | none          | no persistence                    |
+| Grafana               | observability | [http://localhost:3000](http://localhost:3000) | admin / admin | no persistence                    |
+| OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200) | none          | security disabled                 |
+| OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601) | none          | security disabled                 |
+| podinfo               | demo          | [http://localhost:8080](http://localhost:8080) | none          | `/readyz`, `/healthz`, `/metrics` |
 
 Deployment is handled by Helm via Helmfile, with make commands simplifying all operations.
 
@@ -50,9 +51,9 @@ flowchart LR
         subgraph Observability Namespace
             P[Prometheus]
             G[Grafana]
-            ES[Elasticsearch]
+            OS[OpenSearch]
             FB[Fluent Bit]
-            K[Kibana]
+            OSD[OpenSearch Dashboards]
         end
 
         subgraph Demo Namespace
@@ -60,7 +61,7 @@ flowchart LR
         end
 
         PI -->|metrics| P
-        PI -->|logs| FB --> ES --> K
+        PI -->|logs| FB --> OS --> OSD
         G -->|dashboards| P
     end
 ```
@@ -95,8 +96,8 @@ rate(http_requests_total{app="podinfo"}[1m])
 
 ---
 
-## Verify Logs (Kibana)
-1. Kibana → Discover
+## Verify Logs (OpenSearch Dashboards)
+1. OpenSearch Dashboards → Discover
 
 2. Index:
 ```text
@@ -124,9 +125,8 @@ make kind-down  # delete the kind cluster
 ---
 
 ## Notes
-- Elasticsearch is single node and unsecured (dev only).
-- Fluent Bit forwards all container logs to Elasticsearch.
+- OpenSearch is single node and unsecured (dev only).
+- Fluent Bit forwards all container logs to OpenSearch.
 - podinfo is the traffic + metrics source for validating end to end observability.
 - Prometheus and Grafana are non persistent to support an ephemeral workflow.
 - The stack is intended for short lived, iterative demo environments.
-

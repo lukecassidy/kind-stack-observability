@@ -1,3 +1,4 @@
+# Prometheus configuration
 alertmanager:
   enabled: false
 

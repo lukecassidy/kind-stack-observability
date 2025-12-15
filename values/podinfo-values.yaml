@@ -1,3 +1,4 @@
+# Podinfo configuration
 replicaCount: 1
 
 service:
@@ -22,4 +23,4 @@ ui:
   message: "Hello from podinfo on kind-stack-observability"
   logo: ""
 
-backend: "static"
+backend: ""
