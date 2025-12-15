@@ -2,11 +2,13 @@ CLUSTER_NAME ?= kind-stack-observability
 
 .DEFAULT_GOAL := help
 
-.PHONY: help kind-up kind-down deploy destroy status \
+.PHONY: help kind-up kind-down deploy destroy status health-check \
         pf-prometheus pf-grafana pf-opensearch pf-dashboards pf-podinfo pf-all pf-stop
 
 help: ## Show this help message
-	@echo "kind-stack-observability Makefile"
+	@echo ""
+	@echo "kind-stack-observability Help"
+	@echo "========================================"
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
@@ -18,6 +20,7 @@ help: ## Show this help message
 	@echo "  deploy       Deploy observability stack and sample apps"
 	@echo "  destroy      Remove all Helm releases"
 	@echo "  status       Show all pods across namespaces"
+	@echo "  health-check Run health checks on the entire stack"
 	@echo ""
 	@echo "Port Forwarding:"
 	@echo "  pf-prometheus   Port-forward Prometheus (9090)"
@@ -47,6 +50,9 @@ destroy:
 
 status:
 	kubectl get pods -A
+
+health-check:
+	@./scripts/health-check.sh
 
 pf-prometheus:
 	kubectl port-forward svc/prometheus-server -n observability 9090:80
