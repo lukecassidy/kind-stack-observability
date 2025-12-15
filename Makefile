@@ -1,7 +1,36 @@
 CLUSTER_NAME ?= kind-stack-observability
 
-.PHONY: kind-up kind-down deploy destroy status \
+.DEFAULT_GOAL := help
+
+.PHONY: help kind-up kind-down deploy destroy status \
         pf-prometheus pf-grafana pf-opensearch pf-dashboards pf-podinfo pf-all pf-stop
+
+help: ## Show this help message
+	@echo "kind-stack-observability Makefile"
+	@echo ""
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Cluster Management:"
+	@echo "  kind-up      Create KIND cluster"
+	@echo "  kind-down    Delete KIND cluster"
+	@echo ""
+	@echo "Deployment:"
+	@echo "  deploy       Deploy observability stack and sample apps"
+	@echo "  destroy      Remove all Helm releases"
+	@echo "  status       Show all pods across namespaces"
+	@echo ""
+	@echo "Port Forwarding:"
+	@echo "  pf-prometheus   Port-forward Prometheus (9090)"
+	@echo "  pf-grafana      Port-forward Grafana (3000)"
+	@echo "  pf-opensearch   Port-forward OpenSearch (9200)"
+	@echo "  pf-dashboards   Port-forward OpenSearch Dashboards (5601)"
+	@echo "  pf-podinfo      Port-forward podinfo-frontend (8080)"
+	@echo "  pf-all          Port-forward all services"
+	@echo "  pf-stop         Stop all port-forwards"
+	@echo ""
+	@echo "Quick Start:"
+	@echo "  make kind-up && make deploy && make pf-all"
+	@echo ""
 
 kind-up:
 	kind create cluster --name $(CLUSTER_NAME) --config kind-config.yaml
