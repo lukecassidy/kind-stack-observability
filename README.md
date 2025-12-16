@@ -7,10 +7,10 @@ Built for **development and demos only**. Quick to spin up, quick to tear down.
 
 ## Quickstart (TL;DR)
 ```bash
-make kind-up  # create cluster
-make deploy   # deploy stack and sample app
-make status   # verify pods
-make pf-all   # port-forward all UIs (Prometheus, Grafana, OpenSearch Dashboards, podinfo)
+make kind-up      # create cluster
+make deploy       # validate and deploy stack
+make health-check # verify everything is running
+make pf-all       # port-forward all UIs
 ```
 
 Open:
@@ -28,6 +28,8 @@ Open:
 - kubectl
 - helm
 - helmfile
+
+Configure Docker Desktop with at least 8GB memory for things to run smoothly.
 
 ---
 

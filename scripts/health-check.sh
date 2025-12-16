@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# Color codes for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+ORANGE='\033[0;33m'
+NC='\033[0m'
+PASS="${GREEN}✓${NC}"
+FAIL="${RED}✗${NC}"
+WARNING="${ORANGE}✗${NC}"
+
 # Count pods not in Running state for a given namespace
 count_not_running() {
     local namespace=$1
@@ -14,8 +23,8 @@ count_not_running() {
 check_namespace() {
     local namespace=$1
     kubectl get namespace "$namespace" &> /dev/null && \
-        echo "✓ Namespace: $namespace" || \
-        echo "✗ Namespace: $namespace"
+        echo -e "  ${PASS} Namespace: $namespace" || \
+        echo -e "  ${FAIL} Namespace: $namespace"
 }
 
 # Check pods in a namespace
@@ -24,9 +33,9 @@ check_pods() {
     local not_running=$(count_not_running "$namespace")
 
     if [ "$not_running" -eq 0 ]; then
-        echo "✓ All $namespace pods running"
+        echo -e "  ${PASS} Pods: $namespace (all running)"
     else
-        echo "✗ $not_running $namespace pods not running"
+        echo -e "  ${FAIL} Pods: $namespace ($not_running not running)"
         kubectl get pods -n "$namespace" | grep -v "Running" || true
     fi
 }
@@ -37,33 +46,29 @@ check_service() {
     local namespace=$2
     local display_name=$3
     kubectl get svc "$service" -n "$namespace" &> /dev/null && \
-        echo "✓ $display_name" || \
-        echo "✗ $display_name"
+        echo -e "  ${PASS} Service: $display_name" || \
+        echo -e "  ${WARNING} Service: $display_name (not found)"
 }
 
-echo "kind-stack-observability Health Check"
-echo "========================================"
+# Main execution
+echo "Health Check Report"
 
 # Check cluster
 if ! kubectl cluster-info &> /dev/null; then
-    echo "✗ Cluster not reachable"
+    echo -e "  ${FAIL} Cluster: not reachable"
     exit 1
 fi
-echo "✓ Cluster reachable"
+echo -e "  ${PASS} Cluster: reachable"
 
 # Check namespaces
 check_namespace observability
 check_namespace demo
 
 # Check all pods are running
-echo ""
-echo "Pods:"
 check_pods observability
 check_pods demo
 
 # Check key services exist
-echo ""
-echo "Services:"
 check_service prometheus-server observability "Prometheus"
 check_service grafana observability "Grafana"
 check_service opensearch-cluster-master observability "OpenSearch"
@@ -71,15 +76,13 @@ check_service podinfo-frontend demo "podinfo-frontend"
 check_service podinfo-backend demo "podinfo-backend"
 
 # Final health check result
-echo ""
-echo "========================================"
 NOT_RUNNING_OBS=$(count_not_running observability)
 NOT_RUNNING_DEMO=$(count_not_running demo)
 
 if [ "$NOT_RUNNING_OBS" -eq 0 ] && [ "$NOT_RUNNING_DEMO" -eq 0 ]; then
-    echo "✓ Health check passed"
+    echo -e "${GREEN}Health Check Passed${NC}"
     exit 0
 else
-    echo "✗ Health check failed"
+    echo -e "${RED}Health Check Failed${NC}"
     exit 1
 fi

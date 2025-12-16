@@ -5,7 +5,7 @@ CLUSTER_NAME ?= kind-stack-observability
 .PHONY: help kind-up kind-down deploy destroy status validate health-check \
         pf-prometheus pf-grafana pf-opensearch pf-dashboards pf-podinfo pf-all pf-stop
 
-help: ## Show this help message
+help:
 	@echo ""
 	@echo "kind-stack-observability Help"
 	@echo "========================================"
@@ -33,7 +33,7 @@ help: ## Show this help message
 	@echo "  pf-stop         Stop all port-forwards"
 	@echo ""
 	@echo "Quick Start:"
-	@echo "  make kind-up && make deploy && make pf-all"
+	@echo "  make kind-up && make deploy && make health-check && make pf-all"
 	@echo ""
 
 kind-up:
@@ -42,7 +42,8 @@ kind-up:
 kind-down:
 	kind delete cluster --name $(CLUSTER_NAME) || true
 
-deploy:
+# run validate before deploy (target: dependency)
+deploy: validate
 	kubectl apply -f manifests/namespaces.yaml
 	helmfile sync
 
@@ -62,6 +63,7 @@ validate:
 health-check:
 	@./scripts/health-check.sh
 
+# port forwarding helpers
 pf-prometheus:
 	kubectl port-forward svc/prometheus-server -n observability 9090:80
 
