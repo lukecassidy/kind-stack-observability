@@ -80,22 +80,20 @@ podinfo lives in the `demo` namespace and produces both logs and metrics for tes
 - **podinfo-backend** (port 8081) - Backend service for echo requests
 
 Endpoints:
-    - `/`
-    - `/env`
-    - `/headers`
-    - `/healthz`
-    - `/readyz`
-    - `/metrics`
+  - `/`
+  - `/env`
+  - `/headers`
+  - `/healthz`
+  - `/readyz`
+  - `/metrics`
 
 
 Test that the frontend can successfully communicate with the backend.
 
 ```bash
 curl -X POST http://localhost:8080/api/echo -d '{"test":"frontend-to-backend"}'
-```
 
 Expected response:
-```json
 [
   "{\"test\":\"frontend-to-backend\"}"
 ]
