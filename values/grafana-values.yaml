@@ -26,3 +26,34 @@ datasources:
         access: proxy
         url: http://prometheus-server.observability.svc.cluster.local
         isDefault: true
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    # K8s cluster health and resource usage
+    kubernetes-cluster:
+      gnetId: 7249
+      revision: 1
+      datasource: Prometheus
+    # Detailed node level metrics (CPU, memory, disk, network)
+    node-exporter:
+      gnetId: 1860
+      revision: 37
+      datasource: Prometheus
+    # Prometheus health, performance and storage metrics
+    prometheus-stats:
+      gnetId: 3662
+      revision: 2
+      datasource: Prometheus
