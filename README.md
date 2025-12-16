@@ -14,12 +14,12 @@ make pf-all       # port-forward all UIs
 ```
 
 Open:
-- Prometheus → [http://localhost:9090](http://localhost:9090)
-- Grafana → [http://localhost:3000](http://localhost:3000) (admin/admin)
-- OpenSearch Dashboards → [http://localhost:5601](http://localhost:5601)
-- Jaeger UI → [http://localhost:16686](http://localhost:16686)
-- podinfo-frontend → [http://localhost:8080](http://localhost:8080)
-- podinfo-backend → [http://localhost:8081](http://localhost:8081)
+- Prometheus -> [http://localhost:9090](http://localhost:9090)
+- Grafana -> [http://localhost:3000](http://localhost:3000) (admin/admin)
+- OpenSearch Dashboards -> [http://localhost:5601](http://localhost:5601)
+- Jaeger UI -> [http://localhost:16686](http://localhost:16686)
+- podinfo-frontend -> [http://localhost:8080](http://localhost:8080)
+- podinfo-backend -> [http://localhost:8081](http://localhost:8081)
 
 ---
 
@@ -82,17 +82,17 @@ flowchart LR
 ---
 
 ## Sample App: podinfo
-podinfo lives in the `demo` namespace and produces both logs and metrics for testing.
+[podinfo](https://github.com/stefanprodan/podinfo) lives in the `demo` namespace and produces both logs and metrics for testing.
 - **podinfo-frontend** (port 8080) - Frontend service with web UI
 - **podinfo-backend** (port 8081) - Backend service for echo requests
 
-Endpoints:
-  - `/`
-  - `/env`
-  - `/headers`
-  - `/healthz`
-  - `/readyz`
-  - `/metrics`
+Key Endpoints:
+  - `/` - Web UI
+  - `/healthz` - Health check
+  - `/readyz` - Readiness check
+  - `/metrics` - Prometheus metrics
+  - `/api/echo` - Test frontend to backend communication
+  - `/env`, `/headers` - Debugging info
 
 
 Test that the frontend can successfully communicate with the backend.
@@ -108,58 +108,32 @@ Expected response:
 
 ---
 
-## Verify Metrics (Prometheus + Grafana)
-1. Generate traffic:
-```bash
-curl -s localhost:8080/
-curl -s localhost:8080/{readyz,healthz}
-```
+## Verify Observability
 
-2. Prometheus ([http://localhost:9090](http://localhost:9090)):
-```text
-http_requests_total{app="podinfo"}
-```
-
-3. Grafana ([http://localhost:3000](http://localhost:3000)):
-```text
-rate(http_requests_total{app="podinfo"}[1m])
-```
-
----
-
-## Verify Logs (OpenSearch Dashboards)
-1. OpenSearch Dashboards → Discover
-
-2. Index:
-```text
-kubernetes-logs*
-```
-
-3. Filter:
-```text
-kubernetes.namespace_name:"demo"
-```
-
-4. Hit podinfo again and refresh:
-```bash
-curl -s localhost:8080/
-```
-
----
-
-## Verify Traces (Jaeger)
-1. Jaeger UI ([http://localhost:16686](http://localhost:16686))
-
-2. Service dropdown → Select `podinfo-frontend` or `podinfo-backend`
-
-3. Click "Find Traces"
-
-4. Generate some traffic to create traces:
+Generate traffic to test the stack:
 ```bash
 for i in {1..10}; do curl -s localhost:8080/ > /dev/null; done
 ```
 
-5. Refresh Jaeger UI to see distributed traces
+**Metrics** - Prometheus ([http://localhost:9090](http://localhost:9090))
+```text
+Query: http_requests_total{app="podinfo"}
+```
+
+**Dashboards** - Grafana ([http://localhost:3000](http://localhost:3000))
+```text
+Query: rate(http_requests_total{app="podinfo"}[1m])
+```
+
+**Logs** - OpenSearch Dashboards ([http://localhost:5601](http://localhost:5601))
+```text
+Discover -> Index: kubernetes-logs* -> Filter: kubernetes.namespace_name:"demo"
+```
+
+**Traces** - Jaeger UI ([http://localhost:16686](http://localhost:16686))
+```text
+Service: podinfo-frontend or podinfo-backend -> Find Traces
+```
 
 ---
 
