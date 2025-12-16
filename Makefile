@@ -3,7 +3,7 @@ CLUSTER_NAME ?= kind-stack-observability
 .DEFAULT_GOAL := help
 
 .PHONY: help kind-up kind-down deploy destroy status validate health-check \
-        pf-prometheus pf-grafana pf-opensearch pf-dashboards pf-podinfo pf-all pf-stop
+        pf-prometheus pf-grafana pf-opensearch pf-dashboards pf-jaeger pf-podinfo pf-all pf-stop
 
 help:
 	@echo ""
@@ -28,6 +28,7 @@ help:
 	@echo "  pf-grafana      Port-forward Grafana (3000)"
 	@echo "  pf-opensearch   Port-forward OpenSearch (9200)"
 	@echo "  pf-dashboards   Port-forward OpenSearch Dashboards (5601)"
+	@echo "  pf-jaeger       Port-forward Jaeger UI (16686)"
 	@echo "  pf-podinfo      Port-forward podinfo-frontend (8080)"
 	@echo "  pf-all          Port-forward all services"
 	@echo "  pf-stop         Stop all port-forwards"
@@ -76,6 +77,9 @@ pf-opensearch:
 pf-dashboards:
 	kubectl port-forward svc/opensearch-dashboards -n observability 5601:5601
 
+pf-jaeger:
+	kubectl port-forward svc/jaeger-query -n observability 16686:16686
+
 pf-podinfo:
 	kubectl port-forward svc/podinfo-frontend -n demo 8080:9898
 
@@ -84,6 +88,7 @@ pf-all:
 	kubectl port-forward svc/grafana -n observability 3000:80 &
 	kubectl port-forward svc/opensearch-cluster-master -n observability 9200:9200 &
 	kubectl port-forward svc/opensearch-dashboards -n observability 5601:5601 &
+	kubectl port-forward svc/jaeger-query -n observability 16686:16686 &
 	kubectl port-forward svc/podinfo-frontend -n demo 8080:9898 &
 	kubectl port-forward svc/podinfo-backend -n demo 8081:9898 &
 	wait

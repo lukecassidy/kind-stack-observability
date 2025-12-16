@@ -1,0 +1,26 @@
+# Jaeger configuration
+allInOne:
+  enabled: true
+  image:
+    repository: jaegertracing/jaeger
+    tag: 2.2.0
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+storage:
+  type: memory
+
+agent:
+  enabled: false
+
+collector:
+  enabled: false
+
+query:
+  enabled: false

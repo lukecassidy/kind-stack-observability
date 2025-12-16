@@ -18,6 +18,13 @@ podAnnotations:
   prometheus.io/port: "9898"
   prometheus.io/path: "/metrics"
 
+extraArgs:
+  - --otel-service-name=podinfo-frontend
+
+extraEnvs:
+  - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    value: "http://jaeger-collector.observability.svc.cluster.local:4317"
+
 ui:
   color: "#3455db"
   message: "Frontend service"

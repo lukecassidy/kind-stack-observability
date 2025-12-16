@@ -72,6 +72,7 @@ check_pods demo
 check_service prometheus-server observability "Prometheus"
 check_service grafana observability "Grafana"
 check_service opensearch-cluster-master observability "OpenSearch"
+check_service jaeger-query observability "Jaeger"
 check_service podinfo-frontend demo "podinfo-frontend"
 check_service podinfo-backend demo "podinfo-backend"
 

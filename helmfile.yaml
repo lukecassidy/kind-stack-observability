@@ -13,6 +13,8 @@ repositories:
     url: https://opensearch-project.github.io/helm-charts
   - name: fluent
     url: https://fluent.github.io/helm-charts
+  - name: jaegertracing
+    url: https://jaegertracing.github.io/helm-charts
   - name: podinfo
     url: https://stefanprodan.github.io/podinfo
 
@@ -55,6 +57,13 @@ releases:
       - values/fluent-bit-values.yaml
     needs:
       - observability/opensearch
+
+  # Jaeger
+  - name: jaeger
+    namespace: observability
+    chart: jaegertracing/jaeger
+    values:
+      - values/jaeger-values.yaml
 
   # Sample app: podinfo backend
   - name: podinfo-backend
