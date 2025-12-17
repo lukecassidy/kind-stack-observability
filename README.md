@@ -1,7 +1,7 @@
 # kind-stack-observability
 A local Kubernetes **observability stack** running on a **kind** cluster.
 
-Built for **development and demos only**. Quick to spin up, quick to tear down.
+Built for **development and learning**. Quick to spin up, quick to tear down.
 
 ---
 
@@ -15,6 +15,7 @@ make pf-all       # port-forward all UIs
 
 Open:
 - Prometheus -> [http://localhost:9090](http://localhost:9090)
+- Alertmanager -> [http://localhost:9093](http://localhost:9093)
 - Grafana -> [http://localhost:3000](http://localhost:3000) (admin/admin)
 - OpenSearch Dashboards -> [http://localhost:5601](http://localhost:5601)
 - Jaeger UI -> [http://localhost:16686](http://localhost:16686)
@@ -38,13 +39,14 @@ Configure Docker Desktop with at least 8GB memory for things to run smoothly.
 
 | Component             | Namespace     | URL / Port                                       | Auth          | Notes                        |
 | --------------------- | ------------- | ------------------------------------------------ | ------------- | ---------------------------- |
-| Prometheus            | observability | [http://localhost:9090](http://localhost:9090)   | none          | no persistence               |
+| Prometheus            | observability | [http://localhost:9090](http://localhost:9090)   | none          | no persistence, 5 alert rules |
+| Alertmanager          | observability | [http://localhost:9093](http://localhost:9093)   | none          | no persistence, example receivers |
 | Grafana               | observability | [http://localhost:3000](http://localhost:3000)   | admin / admin | no persistence               |
 | OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200)   | none          | security disabled            |
 | OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601)   | none          | security disabled            |
 | Jaeger UI             | observability | [http://localhost:16686](http://localhost:16686) | none          | no persistence               |
-| podinfo-frontend      | demo          | [http://localhost:8080](http://localhost:8080)   | none          | web UI, `/api/echo` endpoint |
-| podinfo-backend       | demo          | [http://localhost:8081](http://localhost:8081)   | none          | backend echo service         |
+| Podinfo Frontend      | demo          | [http://localhost:8080](http://localhost:8080)   | none          | web UI, `/api/echo` endpoint |
+| Podinfo Backend       | demo          | [http://localhost:8081](http://localhost:8081)   | none          | backend echo service         |
 
 Deployment is handled by Helm via Helmfile, with make commands simplifying all operations.
 

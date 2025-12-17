@@ -1,6 +1,56 @@
 # Prometheus configuration
 alertmanager:
-  enabled: false
+  enabled: true
+
+  persistentVolume:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+alertmanagerFiles:
+  alertmanager.yml:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      receiver: 'default-receiver'
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+
+      routes:
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          continue: true
+        - match:
+            severity: warning
+          receiver: 'warning-alerts'
+          continue: true
+
+    receivers:
+      # Default null receiver - accepts alerts but doesn't send notifications
+      # View alerts in Alertmanager UI at http://localhost:9093
+      - name: 'default-receiver'
+
+      # Placeholder receivers (configure with Slack/email/PagerDuty as needed)
+      # See README.md for configuration examples
+      - name: 'critical-alerts'
+      - name: 'warning-alerts'
+
+    inhibit_rules:
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        equal: ['alertname', 'namespace', 'pod']
 
 pushgateway:
   enabled: false
@@ -20,9 +70,29 @@ server:
 serverFiles:
   alerting_rules.yml:
     groups:
-      - name: sample-alerts
+      - name: essential-alerts
         rules:
-          # Alert when container CPU usage exceeds 80%
+          # Alert when pod is not ready - essential for cluster health
+          - alert: PodNotReady
+            expr: kube_pod_status_ready{condition="false"} == 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod not ready"
+              description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in not-ready state for more than 5 minutes"
+
+          # Alert when pod is in CrashLoopBackOff - critical issue
+          - alert: PodCrashLooping
+            expr: kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod in CrashLoopBackOff"
+              description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is in CrashLoopBackOff state"
+
+          # Alert when container CPU usage exceeds 80% - learn resource monitoring
           - alert: HighCPUUsage
             expr: sum(rate(container_cpu_usage_seconds_total[5m])) by (pod, namespace) > 0.8
             for: 2m
@@ -32,12 +102,22 @@ serverFiles:
               summary: "High CPU usage detected"
               description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has high CPU usage ({{ $value }})"
 
-          # Alert when pod is not ready
-          - alert: PodNotReady
-            expr: kube_pod_status_ready{condition="false"} == 1
+          # Alert when container memory usage exceeds 80% - learn resource limits
+          - alert: HighMemoryUsage
+            expr: (container_memory_working_set_bytes / container_spec_memory_limit_bytes) > 0.8
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage detected"
+              description: "Container {{ $labels.container }} in pod {{ $labels.pod }} (namespace {{ $labels.namespace }}) is using {{ $value | humanizePercentage }} of its memory limit"
+
+          # Alert when Prometheus scrape failures occur - self-monitoring
+          - alert: PrometheusHighScrapeFailures
+            expr: rate(prometheus_target_scrapes_exceeded_sample_limit_total[5m]) > 0
             for: 5m
             labels:
               severity: warning
             annotations:
-              summary: "Pod not ready"
-              description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in not-ready state for more than 5 minutes"
+              summary: "Prometheus scrape failures detected"
+              description: "Prometheus has scrape failures for target {{ $labels.job }}"
