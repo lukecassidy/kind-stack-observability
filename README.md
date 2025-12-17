@@ -88,16 +88,7 @@ flowchart LR
 - **podinfo-frontend** (port 8080) - Frontend service with web UI
 - **podinfo-backend** (port 8081) - Backend service for echo requests
 
-Key Endpoints:
-  - `/` - Web UI
-  - `/healthz` - Health check
-  - `/readyz` - Readiness check
-  - `/metrics` - Prometheus metrics
-  - `/api/echo` - Test frontend to backend communication
-  - `/env`, `/headers` - Debugging info
-
-
-Test that the frontend can successfully communicate with the backend.
+Podinfo exposes `/metrics` (Prometheus), `/api/echo` (backend communication), and standard health endpoints. Test frontend-to-backend communication:
 
 ```bash
 curl -X POST http://localhost:8080/api/echo -d '{"test":"frontend-to-backend"}'
@@ -145,32 +136,26 @@ Alerts -> Shows all firing and pending alerts
 
 ---
 
-## Resource Sizing
-
-All components are configured with **minimal resource limits** suitable for local development:
-
-| Component               | CPU Request | Memory Request | CPU Limit | Memory Limit | Rationale                                  |
-| ----------------------- | ----------- | -------------- | --------- | ------------ | ------------------------------------------ |
-| Prometheus              | 100m        | 256Mi          | 500m      | 512Mi        | Scrapes ~10 targets, no persistence        |
-| Grafana                 | 100m        | 128Mi          | 500m      | 256Mi        | Serves 4 dashboards, no persistence        |
-| OpenSearch              | 1000m       | 512Mi          | 2000m     | 1Gi          | Single node with 5Gi storage, handles logs |
-| OpenSearch Dashboards   | 100m        | 256Mi          | 500m      | 512Mi        | Query UI only, minimal processing          |
-| Jaeger                  | 100m        | 256Mi          | 500m      | 512Mi        | All-in-one mode, in-memory traces          |
-| Fluent Bit              | 100m        | 128Mi          | 500m      | 256Mi        | DaemonSet log collector, minimal overhead  |
-| podinfo (frontend/back) | 10m         | 32Mi           | 100m      | 64Mi         | Lightweight demo apps                      |
-
-**Total cluster requirements**: ~2-3 vCPU, ~3-4Gi memory minimum.
-**Recommended Docker Desktop allocation: 8GB** for smooth operation and overhead.
-
----
-
 ## Troubleshooting
-- **Port conflicts**: `make pf-stop` or `lsof -ti:9090 | xargs kill -9`
-- **Pods failing**: `kubectl get pods -A` and `kubectl describe pod <name> -n <namespace>`.
-- **Deployment issues**: Run `make validate` then `helmfile -l name=<component> apply`
-- **Can't access services**: Restart port-forwards with `make pf-stop && make pf-all`
-- **Get logs**: `kubectl logs -n observability deployment/<component> --tail=20`
-- **Check health**: `./scripts/health-check.sh` or `curl http://localhost:9090/api/v1/targets`
+```bash
+# Port conflicts - stop all port-forwards
+make pf-stop
+
+# Pods failing - check status and describe pod
+kubectl get pods -A
+kubectl describe pod <name> -n <namespace>
+
+# Deployment issues - validate and redeploy component
+make validate
+helmfile -l name=<component> apply
+
+# Get logs from a component
+kubectl logs -n observability deployment/<component> --tail=20
+
+# Check health of services
+./scripts/health-check.sh
+curl http://localhost:9090/api/v1/targets
+```
 
 ---
 
