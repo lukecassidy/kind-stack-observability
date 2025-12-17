@@ -23,6 +23,7 @@ releases:
   - name: prometheus
     namespace: observability
     chart: prometheus-community/prometheus
+    version: 27.51.0
     values:
       - values/prometheus-values.yaml
 
@@ -30,6 +31,7 @@ releases:
   - name: grafana
     namespace: observability
     chart: grafana/grafana
+    version: 10.3.2
     values:
       - values/grafana-values.yaml
 
@@ -37,6 +39,7 @@ releases:
   - name: opensearch
     namespace: observability
     chart: opensearch/opensearch
+    version: 3.3.2
     values:
       - values/opensearch-values.yaml
 
@@ -44,6 +47,7 @@ releases:
   - name: opensearch-dashboards
     namespace: observability
     chart: opensearch/opensearch-dashboards
+    version: 3.3.0
     values:
       - values/opensearch-dashboards-values.yaml
     needs:
@@ -53,6 +57,7 @@ releases:
   - name: fluent-bit
     namespace: observability
     chart: fluent/fluent-bit
+    version: 0.54.0
     values:
       - values/fluent-bit-values.yaml
     needs:
@@ -62,6 +67,7 @@ releases:
   - name: jaeger
     namespace: observability
     chart: jaegertracing/jaeger
+    version: 4.1.5
     values:
       - values/jaeger-values.yaml
 
@@ -69,6 +75,7 @@ releases:
   - name: podinfo-backend
     namespace: demo
     chart: podinfo/podinfo
+    version: 6.9.4
     values:
       - values/podinfo-backend-values.yaml
 
@@ -76,6 +83,7 @@ releases:
   - name: podinfo-frontend
     namespace: demo
     chart: podinfo/podinfo
+    version: 6.9.4
     values:
       - values/podinfo-frontend-values.yaml
     needs:
