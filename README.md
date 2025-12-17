@@ -152,7 +152,7 @@ All components are configured with **minimal resource limits** suitable for loca
 | Component               | CPU Request | Memory Request | CPU Limit | Memory Limit | Rationale                                  |
 | ----------------------- | ----------- | -------------- | --------- | ------------ | ------------------------------------------ |
 | Prometheus              | 100m        | 256Mi          | 500m      | 512Mi        | Scrapes ~10 targets, no persistence        |
-| Grafana                 | 100m        | 128Mi          | 500m      | 256Mi        | Serves 3 dashboards, no persistence        |
+| Grafana                 | 100m        | 128Mi          | 500m      | 256Mi        | Serves 4 dashboards, no persistence        |
 | OpenSearch              | 1000m       | 512Mi          | 2000m     | 1Gi          | Single node with 5Gi storage, handles logs |
 | OpenSearch Dashboards   | 100m        | 256Mi          | 500m      | 512Mi        | Query UI only, minimal processing          |
 | Jaeger                  | 100m        | 256Mi          | 500m      | 512Mi        | All-in-one mode, in-memory traces          |

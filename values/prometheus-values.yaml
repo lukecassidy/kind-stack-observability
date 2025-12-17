@@ -76,6 +76,28 @@ serverFiles:
           - targets:
             - localhost:9090
 
+      # Fluent Bit metrics
+      - job_name: fluent-bit
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - observability
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            action: keep
+            regex: fluent-bit
+          - source_labels: [__meta_kubernetes_pod_ip]
+            action: replace
+            target_label: __address__
+            replacement: $1:2020
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+
   alerting_rules.yml:
     groups:
       - name: essential-alerts

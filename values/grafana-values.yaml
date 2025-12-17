@@ -57,3 +57,8 @@ dashboards:
       gnetId: 3662
       revision: 2
       datasource: Prometheus
+    # Fluent Bit log collector metrics and performance
+    fluent-bit:
+      gnetId: 7752
+      revision: 5
+      datasource: Prometheus

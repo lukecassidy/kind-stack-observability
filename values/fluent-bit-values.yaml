@@ -4,7 +4,23 @@ namespace: observability
 serviceAccount:
   create: true
 
+# Enable metrics endpoint for Prometheus scraping
+service:
+  type: ClusterIP
+  port: 2020
+  labels:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2020"
+    prometheus.io/path: "/api/v1/metrics/prometheus"
+
 config:
+  service: |
+    [SERVICE]
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+        Health_Check On
+
   inputs: |
     [INPUT]
         Name tail
