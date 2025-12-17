@@ -68,6 +68,14 @@ server:
       memory: 512Mi
 
 serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      # Prometheus self-monitoring
+      - job_name: prometheus
+        static_configs:
+          - targets:
+            - localhost:9090
+
   alerting_rules.yml:
     groups:
       - name: essential-alerts
@@ -121,3 +129,13 @@ serverFiles:
             annotations:
               summary: "Prometheus scrape failures detected"
               description: "Prometheus has scrape failures for target {{ $labels.job }}"
+
+          # Alert when Prometheus itself is using too much memory
+          - alert: PrometheusHighMemory
+            expr: process_resident_memory_bytes{job="prometheus"} > 400000000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus memory usage high"
+              description: "Prometheus is using {{ $value | humanize1024 }}B of memory (threshold: 400MB)"

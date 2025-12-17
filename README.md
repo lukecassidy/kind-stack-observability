@@ -37,16 +37,16 @@ Configure Docker Desktop with at least 8GB memory for things to run smoothly.
 
 ## Defaults (Ports, Auth, Namespaces)
 
-| Component             | Namespace     | URL / Port                                       | Auth          | Notes                        |
-| --------------------- | ------------- | ------------------------------------------------ | ------------- | ---------------------------- |
-| Prometheus            | observability | [http://localhost:9090](http://localhost:9090)   | none          | no persistence, 5 alert rules |
-| Alertmanager          | observability | [http://localhost:9093](http://localhost:9093)   | none          | no persistence, example receivers |
-| Grafana               | observability | [http://localhost:3000](http://localhost:3000)   | admin / admin | no persistence               |
-| OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200)   | none          | security disabled            |
-| OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601)   | none          | security disabled            |
-| Jaeger UI             | observability | [http://localhost:16686](http://localhost:16686) | none          | no persistence               |
-| Podinfo Frontend      | demo          | [http://localhost:8080](http://localhost:8080)   | none          | web UI, `/api/echo` endpoint |
-| Podinfo Backend       | demo          | [http://localhost:8081](http://localhost:8081)   | none          | backend echo service         |
+| Component             | Namespace     | URL / Port                                       | Auth          | Notes                         |
+| --------------------- | ------------- | ------------------------------------------------ | ------------- | ----------------------------- |
+| Prometheus            | observability | [http://localhost:9090](http://localhost:9090)   | none          | no persistence, sample alerts |
+| Alertmanager          | observability | [http://localhost:9093](http://localhost:9093)   | none          | no persistence                |
+| Grafana               | observability | [http://localhost:3000](http://localhost:3000)   | admin / admin | no persistence                |
+| OpenSearch API        | observability | [http://localhost:9200](http://localhost:9200)   | none          | security disabled             |
+| OpenSearch Dashboards | observability | [http://localhost:5601](http://localhost:5601)   | none          | security disabled             |
+| Jaeger UI             | observability | [http://localhost:16686](http://localhost:16686) | none          | no persistence                |
+| Podinfo Frontend      | demo          | [http://localhost:8080](http://localhost:8080)   | none          | web UI, `/api/echo` endpoint  |
+| Podinfo Backend       | demo          | [http://localhost:8081](http://localhost:8081)   | none          | backend echo service          |
 
 Deployment is handled by Helm via Helmfile, with make commands simplifying all operations.
 
@@ -149,33 +149,28 @@ Alerts -> Shows all firing and pending alerts
 
 All components are configured with **minimal resource limits** suitable for local development:
 
-| Component               | CPU Request | Memory Request | CPU Limit | Memory Limit | Rationale                                    |
-| ----------------------- | ----------- | -------------- | --------- | ------------ | -------------------------------------------- |
-| Prometheus              | 100m        | 256Mi          | 500m      | 512Mi        | Scrapes ~10 targets, no persistence          |
-| Grafana                 | 100m        | 128Mi          | 500m      | 256Mi        | Serves 3 dashboards, no persistence          |
-| OpenSearch              | 1000m       | 512Mi          | 2000m     | 1Gi          | Single-node with 5Gi storage, handles logs   |
-| OpenSearch Dashboards   | 100m        | 256Mi          | 500m      | 512Mi        | Query UI only, minimal processing            |
-| Jaeger                  | 100m        | 256Mi          | 500m      | 512Mi        | All-in-one mode, in-memory traces            |
-| Fluent Bit              | 100m        | 128Mi          | 500m      | 256Mi        | DaemonSet log collector, minimal overhead    |
-| podinfo (frontend/back) | 10m         | 32Mi           | 100m      | 64Mi         | Lightweight demo apps                        |
+| Component               | CPU Request | Memory Request | CPU Limit | Memory Limit | Rationale                                  |
+| ----------------------- | ----------- | -------------- | --------- | ------------ | ------------------------------------------ |
+| Prometheus              | 100m        | 256Mi          | 500m      | 512Mi        | Scrapes ~10 targets, no persistence        |
+| Grafana                 | 100m        | 128Mi          | 500m      | 256Mi        | Serves 3 dashboards, no persistence        |
+| OpenSearch              | 1000m       | 512Mi          | 2000m     | 1Gi          | Single node with 5Gi storage, handles logs |
+| OpenSearch Dashboards   | 100m        | 256Mi          | 500m      | 512Mi        | Query UI only, minimal processing          |
+| Jaeger                  | 100m        | 256Mi          | 500m      | 512Mi        | All-in-one mode, in-memory traces          |
+| Fluent Bit              | 100m        | 128Mi          | 500m      | 256Mi        | DaemonSet log collector, minimal overhead  |
+| podinfo (frontend/back) | 10m         | 32Mi           | 100m      | 64Mi         | Lightweight demo apps                      |
 
-**Total cluster requirements**: ~2-3 vCPU, ~3-4Gi memory minimum. **Recommended Docker Desktop allocation: 8GB** for smooth operation and overhead.
+**Total cluster requirements**: ~2-3 vCPU, ~3-4Gi memory minimum.
+**Recommended Docker Desktop allocation: 8GB** for smooth operation and overhead.
 
 ---
 
 ## Troubleshooting
-
-**Port conflicts**: `make pf-stop` or `lsof -ti:9090 | xargs kill -9`
-
-**Pods failing**: Check with `kubectl get pods -A` and `kubectl describe pod <name> -n <namespace>`. Common fix: Increase Docker memory to 8GB+.
-
-**Deployment issues**: Run `make validate` then `helmfile -l name=<component> apply`
-
-**Can't access services**: Restart port-forwards with `make pf-stop && make pf-all`
-
-**Get logs**: `kubectl logs -n observability deployment/<component> --tail=100`
-
-**Check health**: `./scripts/health-check.sh` or `curl http://localhost:9090/api/v1/targets` (Prometheus)
+- **Port conflicts**: `make pf-stop` or `lsof -ti:9090 | xargs kill -9`
+- **Pods failing**: `kubectl get pods -A` and `kubectl describe pod <name> -n <namespace>`.
+- **Deployment issues**: Run `make validate` then `helmfile -l name=<component> apply`
+- **Can't access services**: Restart port-forwards with `make pf-stop && make pf-all`
+- **Get logs**: `kubectl logs -n observability deployment/<component> --tail=20`
+- **Check health**: `./scripts/health-check.sh` or `curl http://localhost:9090/api/v1/targets`
 
 ---
 
