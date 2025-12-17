@@ -8,7 +8,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 2020
-  labels:
+  annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "2020"
     prometheus.io/path: "/api/v1/metrics/prometheus"

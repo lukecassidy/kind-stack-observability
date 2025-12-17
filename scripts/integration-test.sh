@@ -63,7 +63,7 @@ echo ""
 
 # Test 3: Verify AlertManager is running
 echo "Test 3: Checking AlertManager..."
-AM_POD=$(kubectl get pod -n observability -l app.kubernetes.io/name=prometheus -l app.kubernetes.io/component=alertmanager -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+AM_POD=$(kubectl get pod -n observability -l app.kubernetes.io/name=alertmanager -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 if [ -n "$AM_POD" ]; then
     if kubectl exec -n observability "$AM_POD" -- wget -q -O- http://localhost:9093/-/healthy | grep -q "OK"; then
         pass "AlertManager is healthy"
@@ -78,7 +78,7 @@ echo ""
 # Test 4: Verify Grafana datasource
 echo "Test 4: Checking Grafana datasource configuration..."
 GRAFANA_POD=$(kubectl get pod -n observability -l app.kubernetes.io/name=grafana -o jsonpath='{.items[0].metadata.name}')
-if kubectl exec -n observability "$GRAFANA_POD" -- wget -q -O- --user=admin --password=admin http://localhost:3000/api/datasources | grep -q "Prometheus"; then
+if kubectl exec -n observability "$GRAFANA_POD" -- wget -q -O- --header="Authorization: Basic YWRtaW46YWRtaW4=" http://localhost:3000/api/datasources | grep -q "Prometheus"; then
     pass "Grafana has Prometheus datasource configured"
 else
     fail "Grafana datasource not configured"
@@ -87,8 +87,7 @@ echo ""
 
 # Test 5: Verify OpenSearch cluster health
 echo "Test 5: Checking OpenSearch cluster health..."
-# Note: OpenSearch Helm chart uses 'app=' label instead of 'app.kubernetes.io/name='
-OS_POD=$(kubectl get pod -n observability -l app=opensearch-cluster-master -o jsonpath='{.items[0].metadata.name}')
+OS_POD=$(kubectl get pod -n observability -l app.kubernetes.io/name=opensearch -o jsonpath='{.items[0].metadata.name}')
 CLUSTER_HEALTH=$(kubectl exec -n observability "$OS_POD" -- curl -s http://localhost:9200/_cluster/health | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
 if [ "$CLUSTER_HEALTH" = "green" ] || [ "$CLUSTER_HEALTH" = "yellow" ]; then
     pass "OpenSearch cluster is $CLUSTER_HEALTH"
@@ -121,10 +120,10 @@ echo ""
 # Test 8: Verify Jaeger is receiving traces
 echo "Test 8: Checking Jaeger collector..."
 JAEGER_POD=$(kubectl get pod -n observability -l app.kubernetes.io/name=jaeger -o jsonpath='{.items[0].metadata.name}')
-if kubectl exec -n observability "$JAEGER_POD" -- wget -q -O- http://localhost:14269/ | grep -q "Server available"; then
-    pass "Jaeger collector is available"
+if kubectl exec -n observability "$JAEGER_POD" -- wget -q -O- http://localhost:16686/ | grep -q "html"; then
+    pass "Jaeger query UI is available"
 else
-    fail "Jaeger collector is not responding"
+    fail "Jaeger query UI is not responding"
 fi
 echo ""
 
