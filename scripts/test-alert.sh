@@ -10,6 +10,7 @@ SEVERITY="${2:-warning}"
 ALERTMANAGER_URL="${ALERTMANAGER_URL:-http://localhost:9093}"
 
 # Colors
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -62,7 +63,7 @@ if [ "$HTTP_CODE" = "200" ]; then
     echo "  curl -s $ALERTMANAGER_URL/api/v2/alerts | jq '.'"
     echo ""
 else
-    echo -e "\033[0;31m✗ Failed to send alert (HTTP $HTTP_CODE)${NC}"
+    echo -e "${RED}✗ Failed to send alert (HTTP $HTTP_CODE)${NC}"
     echo "Response: $RESPONSE_BODY"
     exit 1
 fi
