@@ -5,7 +5,7 @@ Built for **development and learning**. Quick to spin up, quick to tear down.
 
 ---
 
-## Quickstart (TL;DR)
+## Quickstart
 ```bash
 make kind-up      # create cluster
 make deploy       # validate and deploy stack
